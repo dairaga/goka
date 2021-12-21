@@ -68,14 +68,18 @@ func TestMain(m *testing.M) {
 	system := goka.System(ctx, "mytest")
 	fmt.Println(system.Name())
 	fmt.Println(system.Path())
+	report := system.ActorOf("reporter", new(Reporter))
+	penguins := []string{}
 
-	p := new(Penguin)
-	d := new(DongDong)
-	r := new(Reporter)
+	for i := 1; i <= 9; i++ {
+		penguins = append(penguins, system.ActorOf(fmt.Sprintf("pengiun-%d", i), new(Penguin)).Path())
+	}
 
-	report := system.ActorOf("reporter", r)
-	report.Send(system.ActorOf("penguin", p), Interest("interest"))
-	report.Send(system.ActorOf("dongdong", d), Interest("interest"))
+	penguins = append(penguins, system.ActorOf("dongdong", new(DongDong)).Path())
+
+	for _, path := range penguins {
+		report.Send(system.SelectActor(path), Interest("interest"))
+	}
 
 	system.Wait()
 	system.Shutdown()

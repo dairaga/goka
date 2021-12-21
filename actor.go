@@ -48,9 +48,11 @@ func (a *actor) Send(target Actor, data any) bool {
 }
 
 func (a *actor) schedule() {
-	msg := a.messages.Get()
-	if msg != nil {
-		a.job <- msg
+	if len(a.job) <= 0 {
+		msg := a.messages.Get()
+		if msg != nil {
+			a.job <- msg
+		}
 	}
 }
 
@@ -72,9 +74,7 @@ func (a *actor) run() {
 		case msg, ok := <-a.inbox:
 			if ok && msg != nil {
 				a.messages.Add(msg)
-				if len(a.job) <= 0 {
-					a.schedule()
-				}
+				a.schedule()
 			}
 		case _, ok := <-a.done:
 			if ok {
