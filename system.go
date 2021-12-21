@@ -52,7 +52,9 @@ func (s *system) SelectActor(path string) Actor {
 }
 
 func (s *system) ActorOf(name string, ref ActorRef) Actor {
-	return newActor(s, s.path+"/user", name, ref)
+	ret := newActor(s, s.path+"/user", name, ref)
+	s.actors[ret.path] = ret
+	return ret
 }
 
 func System(parent context.Context, name string) ActorSystem {
