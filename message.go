@@ -1,7 +1,5 @@
 package goka
 
-import "context"
-
 type Message struct {
 	_      struct{}
 	data   any
@@ -43,18 +41,9 @@ func (m *Messages) Get() *Message {
 	return msg
 }
 
-type ActorRef interface {
-	Receive(sender Actor, data any)
-}
+type Identify string
 
-type Actor interface {
-	Name() string
-	Path() string
-	Tell(ctx context.Context, target Actor, data any) bool
-	accept(ctx context.Context, msg *Message) bool
-}
-
-type ActorSystem interface {
-	Name() string
-	ActorOf(name string, ref ActorRef) Actor
+type ActorIdentify struct {
+	Id     Identify
+	Source Actor
 }

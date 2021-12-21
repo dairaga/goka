@@ -1,17 +1,15 @@
 package goka
 
-import (
-	"context"
-	"fmt"
-)
-
+/*
 type actor struct {
-	name   string
-	path   string
-	ref    ActorRef
+	name string
+	path string
+	ref  ActorRef
+
 	closed bool
 	inbox  chan *Message
 	done   chan struct{}
+	job    chan *Message
 
 	messages *Messages
 }
@@ -34,6 +32,10 @@ func (a *actor) Tell(ctx context.Context, target Actor, data any) bool {
 }
 
 func (a *actor) accept(ctx context.Context, msg *Message) bool {
+	if a.closed {
+		return false
+	}
+
 	select {
 	case a.inbox <- msg:
 		return true
@@ -51,18 +53,23 @@ func (a *actor) run() {
 			if !ok {
 				return
 			}
-			go a.exec(a.messages.Get())
+			msg := a.messages.Get()
+			if msg != nil {
+				a.job <- msg
+			}
 		}
 	}
 }
 
-func (a *actor) exec(msg *Message) {
-	if msg == nil {
-		return
+func (a *actor) exec() {
+	for {
+		msg, ok := <-a.job
+		if !ok || msg == nil {
+			return
+		}
+		a.ref.Receive(msg.sender, msg.data)
+		a.done <- struct{}{}
 	}
-
-	a.ref.Receive(msg.sender, msg.data)
-	a.done <- struct{}{}
 }
 
 func (a *actor) finalize() {
@@ -93,6 +100,7 @@ func (s *system) ActorOf(name string, ref ActorRef) Actor {
 		ref:    ref,
 		closed: false,
 		inbox:  make(chan *Message, 1),
+		job:    make(chan *Message),
 		done:   make(chan struct{}),
 		messages: &Messages{
 			head:  nil,
@@ -102,5 +110,8 @@ func (s *system) ActorOf(name string, ref ActorRef) Actor {
 	}
 
 	go ret.run()
+	go ret.exec()
+
 	return ret
 }
+*/
